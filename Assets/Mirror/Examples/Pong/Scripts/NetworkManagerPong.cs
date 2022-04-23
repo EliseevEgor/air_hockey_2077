@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 
 /*
 	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -16,6 +17,7 @@ namespace Mirror.Examples.Pong
         public Transform leftRacketSpawn;
         public Transform rightRacketSpawn;
         GameObject ball;
+        GameObject computer;
 
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
@@ -30,6 +32,16 @@ namespace Mirror.Examples.Pong
                 ball = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Ball"));
                 NetworkServer.Spawn(ball);
             }
+
+            if (numPlayers == 1)
+            {
+                ball = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Ball"));
+                computer = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Computer"));
+                Assert.IsTrue(ball != null);
+                Assert.IsTrue(computer != null);
+                NetworkServer.Spawn(ball);
+                NetworkServer.Spawn(computer);
+            }
         }
 
         public override void OnServerDisconnect(NetworkConnectionToClient conn)
@@ -38,6 +50,8 @@ namespace Mirror.Examples.Pong
             if (ball != null)
                 NetworkServer.Destroy(ball);
 
+            if (computer != null)
+                NetworkServer.Destroy(computer);
             // call base functionality (actually destroys the player)
             base.OnServerDisconnect(conn);
         }
